@@ -1,6 +1,6 @@
 {
-	"name": "SoundAPI",
-	"description": "A mod-library for working with sound.",
+	"name": "Demo SoundAPI",
+	"description": "Demo SoindAPI",
 	"author": "80LK",
-	"version": "3.0.0"
+	"version": "1.0.0"
 }
