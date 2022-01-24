@@ -31,6 +31,10 @@ interface SoundAdditiveOptions {
      * @default "main"
      */
     type: SoundAPI.Type;
+    /**
+     * @default true
+     */
+    sync: boolean;
 }
 interface SoundOptions extends Partial<SoundAdditiveOptions> {
     /**
