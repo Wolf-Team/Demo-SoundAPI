@@ -2,7 +2,8 @@
 
 const FakeShootId = MOD_ID + ".shoot";
 SoundAPI.registerSound(FakeShootId, {
-	source: FOLDER_SOUNDS + "shoot.ogg"
+	source: FOLDER_SOUNDS + "shoot.ogg",
+	type: SoundAPI.Type.SOUND
 });
 
 Callback.addCallback("ItemUseLocalServer", (coords: Vector, item: ItemInstance) => {

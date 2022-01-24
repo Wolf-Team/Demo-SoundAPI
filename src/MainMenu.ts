@@ -2,6 +2,7 @@
 const SoundInMainUId = MOD_ID + ".main";
 SoundAPI.registerSound(SoundInMainUId, {
 	source: FOLDER_SOUNDS + "/main.mp3",
+	type: SoundAPI.Type.MUSIC,
 	sync: false
 });
 
