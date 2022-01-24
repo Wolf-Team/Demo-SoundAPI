@@ -1,0 +1,8 @@
+{
+	"compilerOptions": {
+		"target": "ES5",
+		"outFile": "main.js",
+		"lib": ["ES5"]
+	},
+	"include": ["decls/**/*", "src/**/*"]
+}
