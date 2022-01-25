@@ -9,7 +9,7 @@ IMPORT("CheckDeps");
 
 new CheckDeps()
 	.add("SoundAPI", function (SoundAPI) {
-		return new SoundAPI(MOD_ID)
+		return SoundAPI.init(MOD_ID)
 	})
 	.launch(function (scope) {
 		Launch(scope)
