@@ -11,4 +11,6 @@ new CheckDeps()
 	.add("SoundAPI", function (SoundAPI) {
 		return new SoundAPI(MOD_ID)
 	})
-	.launch(scope => Launch(scope));
+	.launch(function (scope) {
+		Launch(scope)
+	});
