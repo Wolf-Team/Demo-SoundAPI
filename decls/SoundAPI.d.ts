@@ -1,105 +1,72 @@
-declare type Range = {
-    min: number;
-    max: number;
-};
-interface Dict<value> {
-    [key: string]: value;
-}
-interface SoundAdditiveOptions {
-    /**
-     * Sound hearing distance.
-     * @default 16
-     */
-    defaultDistance: number;
-    /**
-    * Default sound volume
-    * @default 1
-    */
-    defaultVolume: number;
-    /**
-     * Clamp sound volume,
-     * @default (0,1)
-     */
-    clampVolume: Range;
-    /**
-     * Set default mode looping
-     * @default false
-     */
-    loop: boolean;
-    /**
-     * Type sound. Used for setting volume from game settings.
-     * @default "main"
-     */
-    type: SoundAPI.Type;
-    /**
-     * @default true
-     */
-    sync: boolean;
-}
-interface SoundOptions extends Partial<SoundAdditiveOptions> {
-    /**
-     * Path to file
-     */
-    source: string;
-}
-interface SoundMeta extends SoundOptions {
-    typePlayer: "pool" | "player";
-}
-interface MediaMeta extends SoundMeta {
-    typePlayer: "player";
-    file: string;
-}
-interface PoolMeta extends SoundMeta {
-    typePlayer: "pool";
-    soundId: number;
-}
-declare function isPoolMeta(meta: Meta): meta is PoolMeta;
-declare type Meta = PoolMeta | MediaMeta;
-declare namespace SoundAPI {
-    enum Type {
-        MAIN = "main",
-        SOUND = "sound",
-        MUSIC = "music",
-        AMBIENT = "ambient",
-        BLOCK = "block",
-        HOSTILE = "hostile",
-        NEUTRAL = "neutral",
-        RECORD = "record",
-        PLAYER = "player",
-        WEATHER = "weather"
+declare namespace SoundAPINetwork {
+    enum NetworkPacket {
+        Play = "soundapi.play",
+        Pause = "soundapi.pause",
+        Stop = "soundapi.stop"
     }
-    /**
-     * Register sound in system
-     * @param {string} uid - Unical ID for sound
-     * @param {SoundOptions} options - Options sound
-     */
-    function registerSound(uid: string, options: SoundOptions): void;
-    function select(uid: string): SoundAPIPlayer;
+    interface SoundData {
+        id: number;
+    }
+    interface PlayData extends SoundData {
+        uid: string;
+        target: Target;
+        distance: number;
+        volume: number;
+        loop: boolean;
+    }
 }
-interface SoundAPI {
-    registerSound(uid: string, options: SoundOptions): void;
-    select(uid: string): SoundAPIPlayer;
+declare const File: typeof java.io.File;
+interface ObjectConstructor {
+    values<A>(a: A): A[keyof A][];
 }
-declare namespace ModAPI {
-    function addAPICallback(apiName: "SoundAPI", callback: (api: SoundAPI) => void): void;
+declare class InvalidOptions extends Error {
+    readonly uid: string;
+    constructor(uid: string, message: string);
+}
+declare class SourceError extends Error {
+    readonly uid: string;
+    constructor(uid: string);
 }
 interface Position extends Vector {
     dimension: number;
 }
 declare type Target = number | Position;
 declare const MIN_RADIUS = 2;
+interface Volume {
+    left: number;
+    right: number;
+}
 declare abstract class SoundAPIPlayer {
+    protected readonly uid: string;
     protected readonly options: Meta;
     private static players;
     static tick(): void;
-    protected target: Target;
+    private static networkId;
+    protected networkId: number;
+    protected source: Target;
     protected _distance: number;
     protected _volume: number;
+    protected _sync: boolean;
     protected _loop: boolean;
     get looped(): boolean;
     private prepared;
     private paused;
-    constructor(options: Meta);
+    constructor(uid: string, options: Meta);
+    /**
+     * Enable sync player in multiplayer
+     * @returns {this} this player
+     */
+    sync(): this;
+    /**
+     * Disable sync player in multiplayer
+     * @returns {this} this player
+     */
+    sync(sync: false): this;
+    /**
+     * Enable/disable sync player in multiplayer
+     * @returns {this} this player
+     */
+    sync(sync: boolean): this;
     /**
      * Set source at entity
      * @param {number} entity - UID entity
@@ -146,7 +113,7 @@ declare abstract class SoundAPIPlayer {
     protected abstract _pause(): void;
     protected abstract _stop(): void;
     /**
-     * Start or resume playing sound.
+     * Start playing sound.
      */
     play(): void;
     /**
@@ -154,12 +121,19 @@ declare abstract class SoundAPIPlayer {
      */
     pause(): void;
     /**
+     * Resume playing sound.
+     */
+    private resume;
+    /**
      * Stop playing sound.
      */
     stop(): void;
-    protected calcVolume(): number[];
-    protected abstract _tick(leftVolume: number, rightVolume: number): any;
+    protected simpleCalc(sourcePosition: Vector, listenerPosition: Vector, multiplyVolume: number): number;
+    protected advancedCalc(sourcePosition: Vector, listenerPosition: Vector, lookVector: Vector, multiplyVolume: number): Volume;
+    protected calcVolume(): Volume;
+    protected abstract _tick(volume: Volume): void;
     private tick;
+    protected send<D>(packet: SoundAPINetwork.NetworkPacket, data: D): void;
 }
 declare class MediaPlayer extends SoundAPIPlayer {
     protected options: MediaMeta;
@@ -169,7 +143,7 @@ declare class MediaPlayer extends SoundAPIPlayer {
     protected _resume(): void;
     protected _pause(): void;
     protected _stop(): void;
-    protected _tick(leftVolume: number, rightVolume: number): void;
+    protected _tick(volume: Volume): void;
 }
 declare class SoundPlayer extends SoundAPIPlayer {
     private static SoundPool;
@@ -184,21 +158,107 @@ declare class SoundPlayer extends SoundAPIPlayer {
     protected _resume(): void;
     protected _pause(): void;
     protected _stop(): void;
-    protected _tick(leftVolume: number, rightVolume: number): void;
+    protected _tick(volume: Volume): void;
 }
-declare class InvalidOptions extends Error {
-    readonly uid: string;
-    constructor(uid: string, message: string);
+declare type Range = {
+    min: number;
+    max: number;
+};
+interface Dict<value> {
+    [key: string]: value;
 }
-declare class SourceError extends Error {
-    readonly uid: string;
-    constructor(uid: string);
+interface SoundAdditiveOptions {
+    /**
+     * Sound hearing distance.
+     * @default 16
+     */
+    defaultDistance: number;
+    /**
+    * Default sound volume
+    * @default 1
+    */
+    defaultVolume: number;
+    /**
+     * Clamp sound volume,
+     * @default (0,1)
+     */
+    clampVolume: Range;
+    /**
+     * Set default mode looping
+     * @default false
+     */
+    loop: boolean;
+    /**
+     * Type sound. Used for setting volume from game settings.
+     * @default "sound"
+     */
+    type: SoundAPI.Type;
+    /**
+     * Sync player in multiplayer
+     * @default true
+     */
+    sync: boolean;
+}
+interface SoundOptions extends Partial<SoundAdditiveOptions> {
+    /**
+     * Path to file
+     */
+    source: string;
+}
+interface SoundMeta extends SoundOptions {
+    typePlayer: "pool" | "player";
+}
+interface MediaMeta extends SoundMeta {
+    typePlayer: "player";
+}
+interface PoolMeta extends SoundMeta {
+    typePlayer: "pool";
+    soundId: number;
+}
+declare function isPoolMeta(meta: Meta): meta is PoolMeta;
+declare type Meta = PoolMeta | MediaMeta;
+declare class SoundAPI {
+    protected readonly mod_id: string;
+    constructor(mod_id: string);
+    private static readonly sounds;
+    private static getSoundOptions;
+    private getUid;
+    /**
+     * Register sound in system with default settings
+     * @param {string} uid - Unical ID for sound
+     * @param {string} source - path to sound
+     */
+    registerSound(uid: string, source: string): void;
+    /**
+     * Register sound in system
+     * @param {string} uid - Unical ID for sound
+     * @param {SoundOptions} options - Options sound
+     */
+    registerSound(uid: string, options: SoundOptions): void;
+    select(uid: string): SoundAPIPlayer;
+}
+declare namespace SoundAPI {
+    enum Type {
+        SOUND = "sound",
+        MUSIC = "music",
+        AMBIENT = "ambient",
+        BLOCK = "block",
+        HOSTILE = "hostile",
+        NEUTRAL = "neutral",
+        RECORD = "record",
+        PLAYER = "player",
+        WEATHER = "weather"
+    }
+    const defaultOptions: Readonly<SoundAdditiveOptions>;
+}
+declare namespace SoundAPI {
+    function registerSound(uid: string, options: SoundOptions): void;
+    function select(uid: string): SoundAPIPlayer;
+}
+declare namespace ModAPI {
+    function addAPICallback(apiName: "SoundAPI", callback: (api: SoundAPI) => void): void;
 }
 declare function buildAudioAttributes(): android.media.AudioAttributes | false;
-declare const File: typeof java.io.File;
-interface ObjectConstructor {
-    values<A>(a: A): A[keyof A][];
-}
 declare namespace Vector {
     function getDistance(A: Vector, B: Vector): number;
 }

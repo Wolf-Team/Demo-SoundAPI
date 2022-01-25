@@ -1,6 +1,5 @@
 /// <reference path="headers.ts" />
-
-const FakeShootId = MOD_ID + ".shoot";
+const FakeShootId = "shoot";
 SoundAPI.registerSound(FakeShootId, {
 	source: FOLDER_SOUNDS + "shoot.ogg",
 	type: SoundAPI.Type.SOUND

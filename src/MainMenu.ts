@@ -1,5 +1,5 @@
 /// <reference path="headers.ts" />
-const SoundInMainUId = MOD_ID + ".main";
+const SoundInMainUId = "main";
 SoundAPI.registerSound(SoundInMainUId, {
 	source: FOLDER_SOUNDS + "/main.mp3",
 	type: SoundAPI.Type.MUSIC,
