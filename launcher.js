@@ -5,6 +5,10 @@ ConfigureMultiplayer({
 	version: "1.0.0"
 });
 
-ModAPI.addAPICallback("SoundAPI", function (SoundAPI) {
-	Launch({ SoundAPI: new SoundAPI(MOD_ID) });
-});
+IMPORT("CheckDeps");
+
+new CheckDeps()
+	.add("SoundAPI", function (SoundAPI) {
+		return new SoundAPI(MOD_ID)
+	})
+	.launch(scope => Launch(scope));
