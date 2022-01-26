@@ -1,6 +1,6 @@
 /// <reference path="headers.ts" />
 const FakeShootId = "shoot";
-SoundAPI.registerSound(FakeShootId, {
+SoundPool.registerSound(FakeShootId, {
 	source: FOLDER_SOUNDS + "shoot.ogg",
 	type: SoundAPI.Type.SOUND
 });
@@ -10,7 +10,7 @@ Callback.addCallback("ItemUseLocalServer", (coords: Vector, item: ItemInstance) 
 
 	const pos: Position = { ...coords, dimension: Player.getDimension() };
 
-	SoundAPI.select(FakeShootId)
+	SoundPool.select(FakeShootId)
 		.at(pos)
 		.play();
 })

@@ -31,7 +31,7 @@ interface Position extends Vector {
     dimension: number;
 }
 declare type Target = number | Position;
-declare const MIN_RADIUS = 2;
+declare const MUTABLE_VOLUME = 0.8;
 interface Volume {
     left: number;
     right: number;
@@ -198,6 +198,10 @@ interface SoundAdditiveOptions {
      * @default true
      */
     sync: boolean;
+    /**
+     * @default false
+     */
+    muteInSolidBlock: boolean;
 }
 interface SoundOptions extends Partial<SoundAdditiveOptions> {
     /**
@@ -235,6 +239,7 @@ declare class SoundAPI {
      * @param {SoundOptions} options - Options sound
      */
     registerSound(uid: string, options: SoundOptions): void;
+    static select(uid: string): SoundAPIPlayer;
     select(uid: string): SoundAPIPlayer;
 }
 declare namespace SoundAPI {
@@ -249,15 +254,8 @@ declare namespace SoundAPI {
         PLAYER = "player",
         WEATHER = "weather"
     }
-    const defaultOptions: Readonly<SoundAdditiveOptions>;
 }
-declare namespace SoundAPI {
-    function registerSound(uid: string, options: SoundOptions): void;
-    function select(uid: string): SoundAPIPlayer;
-}
-declare namespace ModAPI {
-    function addAPICallback(apiName: "SoundAPI", callback: (api: SoundAPI) => void): void;
-}
+declare const defaultOptions: Readonly<SoundAdditiveOptions>;
 declare function buildAudioAttributes(): android.media.AudioAttributes | false;
 declare namespace Vector {
     function getDistance(A: Vector, B: Vector): number;

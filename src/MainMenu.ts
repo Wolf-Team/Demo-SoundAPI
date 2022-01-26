@@ -1,12 +1,12 @@
 /// <reference path="headers.ts" />
 const SoundInMainUId = "main";
-SoundAPI.registerSound(SoundInMainUId, {
+SoundPool.registerSound(SoundInMainUId, {
 	source: FOLDER_SOUNDS + "/main.mp3",
 	type: SoundAPI.Type.MUSIC,
 	sync: false
 });
 
-const MainPlayer = SoundAPI.select(SoundInMainUId);
+const MainPlayer = SoundPool.select(SoundInMainUId);
 
 Callback.addCallback("PostLoaded", () => {
 	MainPlayer.play();
